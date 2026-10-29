@@ -298,8 +298,12 @@ export default function App() {
     setCurrentStageIdx(0);
     setActiveAgentId('logico');
     
-    // Set all agents state to idle/processing
-    setAgents(prev => prev.map(a => ({ ...a, status: 'processing', thought: 'Processando fluxo cognitivo...' })));
+    // Set initial active agent (logico) to processing initially
+    setAgents(prev => prev.map(a => 
+      a.id === 'logico' 
+        ? { ...a, status: 'processing', thought: 'Recebendo telemetria e validando coerência lógica inicial...' }
+        : { ...a, status: 'idle', thought: 'Aguardando despacho pelo barramento...' }
+    ));
 
     setConsoleLogs([
       `[SIMA-CORE] INICIALIZANDO SOLUCIONADOR COGNITIVO modular para falha reportada!`,
@@ -341,29 +345,64 @@ export default function App() {
           switch (stage) {
             case 1:
               addLog(`[CLASSE-AI] Analisando padrão lexical e metadados de urgência do problema...`);
+              setActiveAgentId('logico');
+              setAgents(prev => prev.map(a => 
+                a.id === 'logico'
+                  ? { ...a, status: 'processing', thought: 'Classificando urgência e analisando coerência semântica...' }
+                  : { ...a, status: 'idle', thought: 'Aguardando despacho...' }
+              ));
               break;
             case 2:
               addLog(`[DIVISOR-AI] Criando planos estruturais. Subdividindo em tarefas menores...`);
+              setActiveAgentId('estrategico');
+              setAgents(prev => prev.map(a => 
+                a.id === 'estrategico'
+                  ? { ...a, status: 'processing', thought: 'Estruturando plano de tarefas e decomposição modular...' }
+                  : a.id === 'logico'
+                  ? { ...a, status: 'completed', thought: 'Coerência semântica validada.' }
+                  : { ...a, status: 'idle', thought: 'Aguardando despacho...' }
+              ));
               break;
             case 3:
               addLog(`[AGENT-BROADCAST] Despachando threads IPC assíncronas para os 6 Agentes Especializados...`);
               setActiveAgentId('causal');
               addToast('warning', 'Etapa Crítica: Despacho para 6 Agentes', 'Threads IPC assíncronas despachadas para especialistas cognitivos.');
+              setAgents(prev => prev.map(a => ({
+                ...a,
+                status: 'processing',
+                thought: a.id === 'causal' ? 'Rastreando causa raiz e eventos predecessores...' :
+                         a.id === 'matematico' ? 'Modelando métricas de latência e limites de Little...' :
+                         a.id === 'memoria' ? 'Varrendo banco vetorial Qdrant em busca de clusters...' :
+                         a.id === 'social' ? 'Avaliando impacto humano no time e usuários...' :
+                         a.id === 'estrategico' ? 'Calculando rotas de mitigação de menor impacto...' :
+                         'Validando invariantes de execução no kernel...'
+              })));
               break;
             case 4:
               addLog(`[MESSAGE-BUS] Barramento de mensageria ativo comercializando consensos parciais.`);
               addLog(`[KAFKA/RABBITMQ] Redistribuição concluída! Sincronia de consenso cruzada.`);
               setActiveAgentId('matematico');
               addToast('info', 'Etapa Crítica: Barramento Inter-Agentes', 'Consenso cruzado e negociação de planos em andamento.');
+              setAgents(prev => prev.map(a => 
+                (a.id === 'matematico' || a.id === 'social')
+                  ? { ...a, status: 'processing', thought: a.id === 'matematico' ? 'Convergindo limites estocásticos e taxas de sucesso...' : 'Consolidando sentimento e diretrizes operacionais...' }
+                  : { ...a, status: 'completed', thought: 'Análise individual concluída e despachada ao broker.' }
+              ));
               break;
             case 5:
               addLog(`[LEARNING] Computando métricas de feedback ambiental e eficiências térmicas...`);
               addLog(`[QDRANT-VECTOR-DB] Gravando vetor de embeddings em coleção 'sima_failures'...`);
               setActiveAgentId('memoria');
               addToast('info', 'Indexação Vetorial Qdrant', 'Gravando embeddings de 4096-D no espaço latente da coleção sima_failures.');
+              setAgents(prev => prev.map(a => 
+                a.id === 'memoria'
+                  ? { ...a, status: 'processing', thought: 'Calculando projeções no espaço latente de 4096-D e persistindo no Qdrant...' }
+                  : { ...a, status: 'completed' }
+              ));
               break;
             case 6:
               addLog(`[POSTGRESQL-DB] Registrando solução aprovada permanentemente na tabela de logs estruturados...`);
+              setAgents(prev => prev.map(a => ({ ...a, status: 'completed' })));
               break;
           }
         } else {
