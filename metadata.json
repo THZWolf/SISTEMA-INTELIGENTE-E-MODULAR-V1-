@@ -1,0 +1,8 @@
+{
+  "name": "Sistema Inteligente Modular",
+  "description": "Simulador interativo do Sistema Inteligente Modular Adaptativo, com núcleo cognitivo, agentes especializados e memória inteligente.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
